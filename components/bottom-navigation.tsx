@@ -32,6 +32,10 @@ function NavigationIcon({ name }: { name: IconName }) {
 export function BottomNavigation() {
   const pathname = usePathname();
 
+  if (pathname === "/login" || pathname === "/setup" || pathname.startsWith("/auth/")) {
+    return null;
+  }
+
   return (
     <nav className="bottom-nav" aria-label="주요 메뉴">
       <div className="bottom-nav__inner">

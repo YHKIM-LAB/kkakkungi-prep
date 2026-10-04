@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { SectionCard } from "@/components/section-card";
+import { getPregnancyProgress } from "@/lib/pregnancy";
+import { createClient } from "@/lib/supabase/server";
 
 const weeklyTasks = [
   { title: "태아보험 알아보기", category: "보험", done: false },
@@ -14,22 +17,53 @@ const upcomingSchedules = [
   { date: "11.05", weekday: "목", title: "1차 기형아 검사", note: "12주차 · 예약 확인 필요" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: membership } = await supabase
+    .from("household_members")
+    .select()
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!membership) {
+    redirect("/setup");
+  }
+
+  const { data: profile } = await supabase
+    .from("pregnancy_profile")
+    .select()
+    .eq("household_id", membership.household_id)
+    .maybeSingle();
+
+  if (!profile) {
+    redirect("/setup");
+  }
+
+  const pregnancy = getPregnancyProgress(profile.due_date);
+  const dDay = pregnancy.daysUntilDue >= 0 ? `D-${pregnancy.daysUntilDue}` : `D+${Math.abs(pregnancy.daysUntilDue)}`;
+
   return (
     <div className="dashboard">
       <section className="hero-card">
         <div className="hero-card__content">
           <p className="eyebrow">오늘의 까꿍이</p>
-          <h1>까꿍이 <span aria-hidden="true">👶</span></h1>
+          <h1>{profile.baby_nickname} <span aria-hidden="true">👶</span></h1>
           <p className="hero-card__lead">조금씩 자라고, 함께 준비하고 있어요.</p>
-          <div className="pregnancy-stat" aria-label="현재 임신 7주 2일, 출산 예정일까지 231일">
-            <strong>7주 2일</strong>
+          <div className="pregnancy-stat" aria-label={`현재 임신 ${pregnancy.weeks}주 ${pregnancy.days}일, ${dDay}`}>
+            <strong>{pregnancy.weeks}주 {pregnancy.days}일</strong>
             <span aria-hidden="true" />
-            <strong>D-231</strong>
+            <strong>{dDay}</strong>
           </div>
         </div>
         <div className="week-orbit" aria-hidden="true">
-          <span>7</span>
+          <span>{pregnancy.weeks}</span>
           <small>WEEK</small>
         </div>
       </section>

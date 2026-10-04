@@ -1,34 +1,47 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
 export type ISODateString = string;
 export type ISODateTimeString = string;
 
+export type HouseholdRole = "owner" | "member";
 export type TaskStatus = "todo" | "in_progress" | "done";
 export type ShoppingPriority = "low" | "medium" | "high";
 export type PurchaseStatus = "planned" | "researching" | "purchased";
 
-export interface Household {
+export type Household = {
   id: string;
   name: string;
+  created_by: string;
   created_at: ISODateTimeString;
+  updated_at: ISODateTimeString;
 }
 
-export interface HouseholdMember {
+export type HouseholdMember = {
   id: string;
   household_id: string;
   user_id: string;
   display_name: string;
-  role: "owner" | "member";
+  role: HouseholdRole;
   created_at: ISODateTimeString;
 }
 
-export interface PregnancyProfile {
+export type PregnancyProfile = {
   id: string;
   household_id: string;
   baby_nickname: string;
   due_date: ISODateString;
   pregnancy_start_date: ISODateString;
+  created_at: ISODateTimeString;
+  updated_at: ISODateTimeString;
 }
 
-export interface Task {
+export type Task = {
   id: string;
   household_id: string;
   title: string;
@@ -39,9 +52,10 @@ export interface Task {
   memo: string | null;
   created_by: string;
   created_at: ISODateTimeString;
+  updated_at: ISODateTimeString;
 }
 
-export interface ShoppingItem {
+export type ShoppingItem = {
   id: string;
   household_id: string;
   item_name: string;
@@ -51,9 +65,11 @@ export interface ShoppingItem {
   price: number | null;
   purchase_url: string | null;
   memo: string | null;
+  created_at: ISODateTimeString;
+  updated_at: ISODateTimeString;
 }
 
-export interface Schedule {
+export type Schedule = {
   id: string;
   household_id: string;
   title: string;
@@ -61,9 +77,11 @@ export interface Schedule {
   pregnancy_week: number | null;
   category: string;
   memo: string | null;
+  created_at: ISODateTimeString;
+  updated_at: ISODateTimeString;
 }
 
-export interface Expense {
+export type Expense = {
   id: string;
   household_id: string;
   title: string;
@@ -72,18 +90,79 @@ export interface Expense {
   paid: boolean;
   payment_date: ISODateString | null;
   memo: string | null;
+  created_at: ISODateTimeString;
+  updated_at: ISODateTimeString;
 }
+
+type Table<Row, Insert, Update> = {
+  Row: Row;
+  Insert: Insert;
+  Update: Update;
+  Relationships: [];
+};
 
 export interface Database {
   public: {
     Tables: {
-      households: { Row: Household };
-      household_members: { Row: HouseholdMember };
-      pregnancy_profile: { Row: PregnancyProfile };
-      tasks: { Row: Task };
-      shopping_items: { Row: ShoppingItem };
-      schedules: { Row: Schedule };
-      expenses: { Row: Expense };
+      households: Table<
+        Household,
+        { id?: string; name: string; created_by: string; created_at?: string; updated_at?: string },
+        { name?: string; updated_at?: string }
+      >;
+      household_members: Table<
+        HouseholdMember,
+        { id?: string; household_id: string; user_id: string; display_name: string; role?: HouseholdRole; created_at?: string },
+        { display_name?: string; role?: HouseholdRole }
+      >;
+      pregnancy_profile: Table<
+        PregnancyProfile,
+        { id?: string; household_id: string; baby_nickname: string; due_date: string; pregnancy_start_date: string; created_at?: string; updated_at?: string },
+        { baby_nickname?: string; due_date?: string; pregnancy_start_date?: string; updated_at?: string }
+      >;
+      tasks: Table<
+        Task,
+        Omit<Task, "id" | "created_at" | "updated_at"> & { id?: string; created_at?: string; updated_at?: string },
+        Partial<Omit<Task, "id" | "household_id" | "created_by" | "created_at">>
+      >;
+      shopping_items: Table<
+        ShoppingItem,
+        Omit<ShoppingItem, "id" | "created_at" | "updated_at"> & { id?: string; created_at?: string; updated_at?: string },
+        Partial<Omit<ShoppingItem, "id" | "household_id" | "created_at">>
+      >;
+      schedules: Table<
+        Schedule,
+        Omit<Schedule, "id" | "created_at" | "updated_at"> & { id?: string; created_at?: string; updated_at?: string },
+        Partial<Omit<Schedule, "id" | "household_id" | "created_at">>
+      >;
+      expenses: Table<
+        Expense,
+        Omit<Expense, "id" | "created_at" | "updated_at"> & { id?: string; created_at?: string; updated_at?: string },
+        Partial<Omit<Expense, "id" | "household_id" | "created_at">>
+      >;
     };
+    Views: Record<string, never>;
+    Functions: {
+      create_household_with_profile: {
+        Args: {
+          p_household_name: string;
+          p_display_name: string;
+          p_baby_nickname: string;
+          p_due_date: string;
+          p_pregnancy_start_date: string;
+        };
+        Returns: string;
+      };
+      is_household_member: {
+        Args: { target_household_id: string };
+        Returns: boolean;
+      };
+    };
+    Enums: {
+      household_role: HouseholdRole;
+      task_status: TaskStatus;
+      shopping_priority: ShoppingPriority;
+      purchase_status: PurchaseStatus;
+    };
+    CompositeTypes: Record<string, never>;
   };
 }

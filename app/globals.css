@@ -742,6 +742,154 @@ input[type="checkbox"] {
 
 .expense-list > li > strong { font-size: 0.82rem; }
 
+.auth-page,
+.setup-page {
+  min-height: calc(100vh - 8rem);
+  display: grid;
+  align-items: center;
+  gap: 2rem;
+  padding-block: 2rem;
+}
+
+.auth-intro,
+.setup-page > div:first-child {
+  max-width: 36rem;
+}
+
+.auth-intro__mark {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+  color: white;
+  background: var(--accent);
+  font-size: 1.15rem;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgba(201, 77, 59, 0.2);
+}
+
+.auth-intro h1,
+.setup-page h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 9vw, 4rem);
+  line-height: 1.12;
+  letter-spacing: -0.075em;
+}
+
+.auth-intro > p:last-child,
+.setup-page > div:first-child > p:last-child {
+  max-width: 32rem;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.auth-card,
+.setup-form {
+  width: 100%;
+  max-width: 30rem;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  padding: 0.3rem;
+  border-radius: 0.95rem;
+  background: #f7f1eb;
+}
+
+.auth-tabs button {
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 0.75rem;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auth-tabs button[aria-selected="true"] {
+  color: var(--ink);
+  background: white;
+  box-shadow: 0 4px 12px rgba(55, 44, 35, 0.08);
+}
+
+.auth-form,
+.setup-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-form label,
+.setup-form label {
+  display: grid;
+  gap: 0.45rem;
+  color: #4d5a55;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.auth-form input,
+.setup-form input {
+  width: 100%;
+  min-height: 3.2rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #ddd5cd;
+  border-radius: 0.9rem;
+  outline: none;
+  color: var(--ink);
+  background: white;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-form input:focus,
+.setup-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.primary-button {
+  min-height: 3.25rem;
+  border: 0;
+  border-radius: 0.95rem;
+  color: white;
+  background: var(--accent);
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.primary-button:hover { background: var(--accent-dark); }
+.primary-button:active { transform: translateY(1px); }
+.primary-button:disabled { opacity: 0.6; cursor: wait; }
+
+.form-message {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.8rem;
+  color: #8c4033;
+  background: #fff0eb;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.setup-form__hint {
+  margin: -0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
 @media (hover: hover) {
   .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
   .bottom-nav__link:hover { color: var(--accent-dark); background: #fff6f1; }
@@ -771,6 +919,16 @@ input[type="checkbox"] {
   .bottom-nav__inner { display: flex; gap: 0.2rem; }
   .bottom-nav__link { min-width: 4.5rem; min-height: 3.7rem; padding-inline: 0.6rem; }
   .app-shell { padding-bottom: 6rem; }
+
+  .auth-page,
+  .setup-page {
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 30rem);
+    justify-content: space-between;
+    gap: 4rem;
+  }
+
+  .auth-card,
+  .setup-form { padding: 1.6rem; }
 }
 
 @media (min-width: 980px) {
