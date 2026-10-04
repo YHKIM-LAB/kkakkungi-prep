@@ -61,6 +61,7 @@ export default async function HomePage() {
             <span aria-hidden="true" />
             <strong>{dDay}</strong>
           </div>
+          <Link className="family-entry-link" href="/family">가족 설정 · 배우자 초대</Link>
         </div>
         <div className="week-orbit" aria-hidden="true">
           <span>{pregnancy.weeks}</span>

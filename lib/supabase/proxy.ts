@@ -1,9 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { getSafeRedirect } from "@/lib/redirect";
 import type { Database } from "@/types/database";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/invite", "/auth/callback"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -44,10 +45,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && pathname === "/login") {
-    const destination = request.nextUrl.clone();
-    destination.pathname = "/setup";
-    destination.search = "";
-    return NextResponse.redirect(destination);
+    return NextResponse.redirect(new URL(getSafeRedirect(request.nextUrl.searchParams.get("next"), "/setup"), request.url));
   }
 
   return response;

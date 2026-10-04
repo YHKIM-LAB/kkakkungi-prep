@@ -32,7 +32,7 @@ function NavigationIcon({ name }: { name: IconName }) {
 export function BottomNavigation() {
   const pathname = usePathname();
 
-  if (pathname === "/login" || pathname === "/setup" || pathname.startsWith("/auth/")) {
+  if (pathname === "/login" || pathname === "/setup" || pathname === "/invite" || pathname.startsWith("/auth/")) {
     return null;
   }
 

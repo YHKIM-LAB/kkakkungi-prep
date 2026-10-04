@@ -31,6 +31,19 @@ export type HouseholdMember = {
   created_at: ISODateTimeString;
 }
 
+export type HouseholdInvitation = {
+  id: string;
+  household_id: string;
+  email: string;
+  token_hash: string;
+  invited_by: string;
+  expires_at: ISODateTimeString;
+  accepted_at: ISODateTimeString | null;
+  accepted_by: string | null;
+  revoked_at: ISODateTimeString | null;
+  created_at: ISODateTimeString;
+}
+
 export type PregnancyProfile = {
   id: string;
   household_id: string;
@@ -114,6 +127,26 @@ export interface Database {
         { id?: string; household_id: string; user_id: string; display_name: string; role?: HouseholdRole; created_at?: string },
         { display_name?: string; role?: HouseholdRole }
       >;
+      household_invitations: Table<
+        HouseholdInvitation,
+        {
+          id?: string;
+          household_id: string;
+          email: string;
+          token_hash: string;
+          invited_by: string;
+          expires_at: string;
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          revoked_at?: string | null;
+          created_at?: string;
+        },
+        {
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          revoked_at?: string | null;
+        }
+      >;
       pregnancy_profile: Table<
         PregnancyProfile,
         { id?: string; household_id: string; baby_nickname: string; due_date: string; pregnancy_start_date: string; created_at?: string; updated_at?: string },
@@ -150,6 +183,18 @@ export interface Database {
           p_due_date: string;
           p_pregnancy_start_date: string;
         };
+        Returns: string;
+      };
+      create_household_invitation: {
+        Args: { p_email: string };
+        Returns: { token: string; email: string; expires_at: string }[];
+      };
+      get_household_invitation: {
+        Args: { p_token: string };
+        Returns: { email: string; household_name: string; expires_at: string; status: string }[];
+      };
+      accept_household_invitation: {
+        Args: { p_token: string };
         Returns: string;
       };
       is_household_member: {

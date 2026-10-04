@@ -43,7 +43,7 @@ export function AuthForm({ redirectTo = "/" }: { redirectTo?: string }) {
       return;
     }
 
-    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent("/setup")}`;
+    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -57,7 +57,7 @@ export function AuthForm({ redirectTo = "/" }: { redirectTo?: string }) {
     }
 
     if (data.session) {
-      router.replace("/setup");
+      router.replace(redirectTo);
       router.refresh();
       return;
     }

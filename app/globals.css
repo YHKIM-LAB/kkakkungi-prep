@@ -72,6 +72,15 @@ input {
   font-size: 0.875rem;
 }
 
+.header-family-link {
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.8rem;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .wordmark {
   display: flex;
   align-items: center;
@@ -186,6 +195,18 @@ input {
   height: 0.3rem;
   border-radius: 50%;
   background: var(--accent);
+}
+
+.family-entry-link {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  margin-top: 0.9rem;
+  color: var(--accent-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
 }
 
 .week-orbit {
@@ -890,6 +911,265 @@ input[type="checkbox"] {
   line-height: 1.55;
 }
 
+.family-page {
+  padding-bottom: 1rem;
+}
+
+.family-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1.4rem;
+  background: linear-gradient(145deg, #ffe8df, #fff6e8);
+  box-shadow: var(--shadow);
+}
+
+.family-summary > div {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.25rem;
+}
+
+.family-summary > div + div {
+  border-left: 1px solid rgba(201, 77, 59, 0.12);
+}
+
+.family-summary span,
+.invitation-result span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.family-summary strong {
+  font-size: 1.12rem;
+  letter-spacing: -0.04em;
+}
+
+.member-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member-list li {
+  min-height: 4.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.member-list li:first-child { border-top: 0; }
+
+.member-avatar {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.member-list li > div {
+  min-width: 0;
+  display: grid;
+  flex: 1;
+  gap: 0.2rem;
+}
+
+.member-list li > div strong { font-size: 0.9rem; }
+.member-list li > div span { color: var(--muted); font-size: 0.7rem; }
+
+.role-badge {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: #557060;
+  background: #e8f1eb;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.role-badge--owner {
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+}
+
+.invite-form,
+.invite-form-wrap,
+.invitation-result {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.invite-form label,
+.invitation-result > label {
+  color: #4d5a55;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.invite-form__row,
+.invite-link-row {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.invite-form input,
+.invite-link-row input {
+  width: 100%;
+  min-width: 0;
+  min-height: 3.2rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #ddd5cd;
+  border-radius: 0.9rem;
+  outline: none;
+  color: var(--ink);
+  background: white;
+}
+
+.invitation-result {
+  margin-top: 0.35rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff7f2;
+}
+
+.invitation-result > div:not(.invite-link-row) {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.invitation-result strong { font-size: 0.84rem; overflow-wrap: anywhere; }
+
+.invite-link-row button {
+  min-height: 3rem;
+  padding-inline: 1rem;
+  border: 0;
+  border-radius: 0.9rem;
+  color: white;
+  background: var(--ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.secondary-button {
+  min-height: 3rem;
+  padding-inline: 1rem;
+  border: 1px solid #ddd5cd;
+  border-radius: 0.9rem;
+  color: var(--ink);
+  background: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.secondary-button:disabled { opacity: 0.6; cursor: wait; }
+
+.family-notice {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.invite-page {
+  min-height: calc(100vh - 4rem);
+  display: grid;
+  place-items: center;
+  padding-block: 1rem;
+}
+
+.invite-card {
+  width: 100%;
+  max-width: 34rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 1.7rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.invite-card__icon {
+  width: 3.2rem;
+  height: 3.2rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.3rem;
+  border-radius: 1rem;
+  color: white;
+  background: var(--accent);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.invite-card h1 {
+  margin: 0;
+  font-size: clamp(2rem, 9vw, 3.3rem);
+  line-height: 1.1;
+  letter-spacing: -0.07em;
+}
+
+.invite-card__lead {
+  margin: 1rem 0 1.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.invite-details {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+
+.invite-details > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.invite-details > div:first-child { border-top: 0; }
+.invite-details dt { color: var(--muted); font-size: 0.7rem; }
+.invite-details dd { margin: 0; font-size: 0.86rem; font-weight: 800; overflow-wrap: anywhere; }
+
+.invite-actions,
+.accept-invitation-form,
+.invite-mismatch {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.invite-actions p,
+.invite-mismatch p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.invite-actions .primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.invite-mismatch {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff0eb;
+}
+
+.invite-mismatch strong { color: #8c4033; }
+.invite-card--message .text-link { display: inline-flex; }
+
 @media (hover: hover) {
   .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
   .bottom-nav__link:hover { color: var(--accent-dark); background: #fff6f1; }
@@ -929,6 +1209,10 @@ input[type="checkbox"] {
 
   .auth-card,
   .setup-form { padding: 1.6rem; }
+
+  .invite-form__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .invite-link-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .invite-card { padding: 2.2rem; }
 }
 
 @media (min-width: 980px) {
