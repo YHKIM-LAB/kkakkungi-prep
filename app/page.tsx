@@ -4,12 +4,7 @@ import { redirect } from "next/navigation";
 import { SectionCard } from "@/components/section-card";
 import { getPregnancyProgress } from "@/lib/pregnancy";
 import { createClient } from "@/lib/supabase/server";
-
-const weeklyTasks = [
-  { title: "태아보험 알아보기", category: "보험", done: false },
-  { title: "출산병원 후보 정리", category: "병원", done: true },
-  { title: "다음 산부인과 일정 확인", category: "일정", done: false },
-];
+import { formatTaskDate, sortTasks, TASK_STATUS_LABELS } from "@/lib/tasks";
 
 const upcomingSchedules = [
   { date: "10.08", weekday: "목", title: "다음 산부인과 진료", note: "오전 10:30 · 햇살여성병원" },
@@ -36,11 +31,10 @@ export default async function HomePage() {
     redirect("/setup");
   }
 
-  const { data: profile } = await supabase
-    .from("pregnancy_profile")
-    .select()
-    .eq("household_id", membership.household_id)
-    .maybeSingle();
+  const [{ data: profile }, { data: tasks, error: tasksError }] = await Promise.all([
+    supabase.from("pregnancy_profile").select().eq("household_id", membership.household_id).maybeSingle(),
+    supabase.from("tasks").select().eq("household_id", membership.household_id),
+  ]);
 
   if (!profile) {
     redirect("/setup");
@@ -48,6 +42,10 @@ export default async function HomePage() {
 
   const pregnancy = getPregnancyProgress(profile.due_date);
   const dDay = pregnancy.daysUntilDue >= 0 ? `D-${pregnancy.daysUntilDue}` : `D+${Math.abs(pregnancy.daysUntilDue)}`;
+  const allTasks = tasks ?? [];
+  const upcomingTasks = sortTasks(allTasks.filter((task) => task.status !== "done")).slice(0, 3);
+  const completedTaskCount = allTasks.filter((task) => task.status === "done").length;
+  const taskProgress = allTasks.length ? Math.round((completedTaskCount / allTasks.length) * 100) : 0;
 
   return (
     <div className="dashboard">
@@ -72,21 +70,30 @@ export default async function HomePage() {
       <div className="dashboard__grid">
         <SectionCard
           title="이번 주 할 일"
-          description="이번 주에 둘이 챙길 3가지"
+          description={tasksError
+            ? "목록을 잠시 불러오지 못했어요"
+            : upcomingTasks.length
+              ? "가까운 준비부터 최대 3개를 보여드려요"
+              : "가족과 함께 첫 할 일을 만들어 보세요"}
           trailing={<Link className="text-link" href="/tasks">전체 보기</Link>}
           className="dashboard__tasks"
         >
           <ul className="task-list">
-            {weeklyTasks.map((task) => (
-              <li key={task.title} className={task.done ? "is-done" : undefined}>
-                <input type="checkbox" defaultChecked={task.done} aria-label={`${task.title} 완료 여부`} />
+            {upcomingTasks.map((task) => (
+              <li key={task.id}>
+                <span className="home-task-status" aria-hidden="true" />
                 <div>
                   <strong>{task.title}</strong>
-                  <span>{task.category}</span>
+                  <span>{task.category} · {task.due_date ? formatTaskDate(task.due_date) : TASK_STATUS_LABELS[task.status]}</span>
                 </div>
               </li>
             ))}
           </ul>
+          {tasksError ? (
+            <p className="dashboard-empty" role="alert">할 일을 불러오지 못했어요. 잠시 후 다시 확인해 주세요.</p>
+          ) : !upcomingTasks.length ? (
+            <p className="dashboard-empty">이번 주 예정된 할 일이 없어요.</p>
+          ) : null}
         </SectionCard>
 
         <SectionCard
@@ -112,13 +119,17 @@ export default async function HomePage() {
           </ol>
         </SectionCard>
 
-        <SectionCard title="출산 준비 진행률" description="전체 준비 항목 기준" className="dashboard__progress">
+        <SectionCard title="출산 준비 진행률" description="등록된 할 일 완료 기준" className="dashboard__progress">
           <div className="progress-summary">
-            <strong>38<span>%</span></strong>
-            <p>지난주보다 <b>6%</b> 더 준비했어요</p>
+            <strong>{taskProgress}<span>%</span></strong>
+            <p>{tasksError
+              ? "진행률을 불러오지 못했어요"
+              : allTasks.length
+                ? <><b>{completedTaskCount}개</b> 완료 · 전체 {allTasks.length}개</>
+                : "아직 등록된 할 일이 없어요"}</p>
           </div>
-          <div className="progress-track" role="progressbar" aria-label="출산 준비 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={38}>
-            <span style={{ width: "38%" }} />
+          <div className="progress-track" role="progressbar" aria-label="출산 준비 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={taskProgress}>
+            <span style={{ width: `${taskProgress}%` }} />
           </div>
         </SectionCard>
 

@@ -1,31 +1,44 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+
 import { PageHeading } from "@/components/page-heading";
-import { SectionCard } from "@/components/section-card";
+import { TaskBoard } from "@/components/tasks/task-board";
+import { createClient } from "@/lib/supabase/server";
+import { sortTasks } from "@/lib/tasks";
 
-const tasks = [
-  { title: "태아보험 비교표 만들기", meta: "보험 · 이번 주", status: "시작 전", done: false },
-  { title: "출산병원 후보 정리", meta: "병원 · 7주차", status: "완료", done: true },
-  { title: "임신확인서 발급 확인", meta: "행정 · 8주차", status: "진행 중", done: false },
-  { title: "보건소 혜택 알아보기", meta: "행정 · 9주차", status: "시작 전", done: false },
-];
+export const metadata: Metadata = { title: "할 일" };
 
-export default function TasksPage() {
+export default async function TasksPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login?next=/tasks");
+
+  const { data: membership } = await supabase
+    .from("household_members")
+    .select()
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!membership) redirect("/setup");
+
+  const [{ data: tasks, error: tasksError }, { data: profile }] = await Promise.all([
+    supabase.from("tasks").select().eq("household_id", membership.household_id),
+    supabase.from("pregnancy_profile").select().eq("household_id", membership.household_id).maybeSingle(),
+  ]);
+
   return (
-    <div className="subpage">
-      <PageHeading eyebrow="함께 하나씩" title="할 일" description="이번 주에 필요한 준비부터 부담 없이 나눠 해요." />
-      <SectionCard title="이번 주 목록" description="4개 중 1개를 완료했어요" trailing={<span className="count-badge">1 / 4</span>}>
-        <ul className="detail-list">
-          {tasks.map((task) => (
-            <li key={task.title}>
-              <input type="checkbox" defaultChecked={task.done} aria-label={`${task.title} 완료 여부`} />
-              <div className={task.done ? "is-done" : undefined}>
-                <strong>{task.title}</strong>
-                <span>{task.meta}</span>
-              </div>
-              <span className={`status-pill status-pill--${task.done ? "done" : "todo"}`}>{task.status}</span>
-            </li>
-          ))}
-        </ul>
-      </SectionCard>
+    <div className="subpage tasks-page">
+      <PageHeading eyebrow="함께 하나씩" title="할 일" description="필요한 준비를 가족과 같은 목록에서 관리해요." />
+      {tasksError ? (
+        <div className="card task-empty" role="alert">
+          <strong>할 일을 불러오지 못했어요.</strong>
+          <p>잠시 후 페이지를 새로고침해 주세요.</p>
+        </div>
+      ) : (
+        <TaskBoard tasks={sortTasks(tasks ?? [])} profileDueDate={profile?.due_date ?? null} />
+      )}
     </div>
   );
 }

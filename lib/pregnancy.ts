@@ -15,6 +15,14 @@ function formatDateOnly(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+export function isValidDateOnly(value: string) {
+  try {
+    return formatDateOnly(parseDateOnly(value)) === value;
+  } catch {
+    return false;
+  }
+}
+
 export function getPregnancyStartDate(dueDate: string) {
   const startDate = parseDateOnly(dueDate);
   startDate.setUTCDate(startDate.getUTCDate() - FULL_TERM_DAYS);
@@ -34,4 +42,12 @@ export function getPregnancyProgress(dueDate: string, now = new Date()) {
     daysUntilDue,
     progressPercent: Math.max(0, Math.min(100, Math.round((elapsedDays / FULL_TERM_DAYS) * 100))),
   };
+}
+
+export function getPregnancyWeekForDate(dueDate: string, targetDate: string) {
+  const startDate = parseDateOnly(getPregnancyStartDate(dueDate));
+  const target = parseDateOnly(targetDate);
+  const week = Math.floor((target.getTime() - startDate.getTime()) / DAY_IN_MS / 7);
+
+  return Math.max(0, Math.min(45, week));
 }
