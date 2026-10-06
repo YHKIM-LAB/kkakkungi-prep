@@ -1,10 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  decodeInviteContext,
+  encodeInviteContext,
+  getInviteRedirect,
+  INVITE_CONTEXT_COOKIE,
+  INVITE_CONTEXT_MAX_AGE,
+} from "@/lib/invite-context";
 import { getSafeRedirect } from "@/lib/redirect";
 import type { Database } from "@/types/database";
 
-const PUBLIC_PATHS = ["/login", "/invite", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/invite", "/auth/callback", "/auth/invite-context"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -36,6 +43,19 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
   const { pathname, search } = request.nextUrl;
+  const requestedRedirect = getSafeRedirect(request.nextUrl.searchParams.get("next"), "/setup");
+  const requestedInvite = getInviteRedirect(requestedRedirect);
+  const savedInvite = decodeInviteContext(request.cookies.get(INVITE_CONTEXT_COOKIE)?.value);
+
+  if (!user && pathname === "/login" && requestedInvite) {
+    response.cookies.set(INVITE_CONTEXT_COOKIE, encodeInviteContext(requestedInvite), {
+      httpOnly: true,
+      maxAge: INVITE_CONTEXT_MAX_AGE,
+      path: "/",
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+    });
+  }
 
   if (!user && !isPublicPath(pathname)) {
     const loginUrl = request.nextUrl.clone();
@@ -45,7 +65,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && pathname === "/login") {
-    return NextResponse.redirect(new URL(getSafeRedirect(request.nextUrl.searchParams.get("next"), "/setup"), request.url));
+    return NextResponse.redirect(new URL(requestedInvite ?? savedInvite ?? requestedRedirect, request.url));
+  }
+
+  if (user && savedInvite && pathname === "/setup") {
+    return NextResponse.redirect(new URL(savedInvite, request.url));
   }
 
   return response;

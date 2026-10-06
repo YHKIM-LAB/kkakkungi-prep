@@ -1,7 +1,9 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { INVITE_CONTEXT_COOKIE } from "@/lib/invite-context";
 import { createClient } from "@/lib/supabase/server";
 
 export type AcceptInvitationState = { error: string | null };
@@ -35,5 +37,7 @@ export async function acceptInvitation(
     return { error: translated?.[1] ?? "초대를 수락하지 못했어요. 잠시 후 다시 시도해 주세요." };
   }
 
+  const cookieStore = await cookies();
+  cookieStore.delete(INVITE_CONTEXT_COOKIE);
   redirect("/");
 }

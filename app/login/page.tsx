@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AuthForm } from "@/components/auth/auth-form";
+import { decodeInviteContext, getInviteRedirect, INVITE_CONTEXT_COOKIE } from "@/lib/invite-context";
 import { getSafeRedirect } from "@/lib/redirect";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,7 +13,11 @@ export const metadata: Metadata = {
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
-  const redirectTo = getSafeRedirect(next);
+  const requestedRedirect = getSafeRedirect(next);
+  const requestedInvite = getInviteRedirect(requestedRedirect);
+  const cookieStore = await cookies();
+  const savedInvite = decodeInviteContext(cookieStore.get(INVITE_CONTEXT_COOKIE)?.value);
+  const redirectTo = requestedInvite ?? savedInvite ?? requestedRedirect;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

@@ -43,11 +43,12 @@ export function AuthForm({ redirectTo = "/" }: { redirectTo?: string }) {
       return;
     }
 
-    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    callbackUrl.searchParams.set("next", redirectTo);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo },
+      options: { emailRedirectTo: callbackUrl.toString() },
     });
 
     if (error) {

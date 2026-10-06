@@ -74,7 +74,7 @@ function InviteMessage({ title, description }: { title: string; description: str
         <span className="invite-card__icon" aria-hidden="true">!</span>
         <h1>{title}</h1>
         <p className="invite-card__lead">{description}</p>
-        <Link className="text-link" href="/">홈으로 돌아가기</Link>
+        <Link className="text-link" href="/auth/invite-context">초대 흐름 종료하고 홈으로</Link>
       </div>
     </section>
   );
