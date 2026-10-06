@@ -14,6 +14,32 @@ const initialErrorMap: Record<string, string> = {
   "Invalid invitation email": "이메일 주소를 다시 확인해 주세요.",
 };
 
+type RpcError = {
+  message: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+};
+
+function getInvitationErrorMessage(error: RpcError) {
+  const translated = Object.entries(initialErrorMap).find(([message]) => error.message.includes(message));
+
+  if (translated) return translated[1];
+
+  switch (error.code) {
+    case "23505":
+      return "같은 이메일의 이전 초대 기록과 충돌했어요. 데이터베이스 업데이트를 확인해 주세요.";
+    case "23503":
+      return "가족 공간 정보를 확인하지 못했어요. 페이지를 새로고침한 뒤 다시 시도해 주세요.";
+    case "42501":
+      return "초대 권한이 없어요. 가족 공간의 owner 계정인지 확인해 주세요.";
+    case "PGRST202":
+      return "초대 기능이 데이터베이스에 아직 반영되지 않았어요.";
+    default:
+      return "초대 링크를 만들지 못했어요. 잠시 후 다시 시도해 주세요.";
+  }
+}
+
 export async function createInvitation(
   _state: InvitationState,
   formData: FormData,
@@ -49,10 +75,24 @@ export async function createInvitation(
   const { data, error } = await supabase.rpc("create_household_invitation", { p_email: email });
   const invitation = data?.[0];
 
-  if (error || !invitation) {
-    const translated = Object.entries(initialErrorMap).find(([message]) => error?.message.includes(message));
+  if (error) {
+    console.error("[create_household_invitation] RPC failed", {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
+
     return {
-      error: translated?.[1] ?? "초대 링크를 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
+      error: getInvitationErrorMessage(error),
+      invitation: null,
+    };
+  }
+
+  if (!invitation) {
+    console.error("[create_household_invitation] RPC returned no invitation row");
+    return {
+      error: "초대 정보를 받지 못했어요. 잠시 후 다시 시도해 주세요.",
       invitation: null,
     };
   }
