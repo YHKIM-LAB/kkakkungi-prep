@@ -37,7 +37,7 @@ begin
   ) then
     execute $sql$
       update public.household_invitations
-      set token_hash = encode(digest(token::text, 'sha256'), 'hex')
+      set token_hash = encode(extensions.digest(token::text, 'sha256'), 'hex')
       where token_hash is null and token is not null
     $sql$;
     execute 'alter table public.household_invitations alter column token drop default';
@@ -131,7 +131,7 @@ begin
     and hi.revoked_at is null
     and hi.expires_at <= now();
 
-  raw_token := encode(gen_random_bytes(32), 'hex');
+  raw_token := encode(extensions.gen_random_bytes(32), 'hex');
 
   insert into public.household_invitations (
     household_id,
@@ -142,7 +142,7 @@ begin
   ) values (
     owner_household_id,
     normalized_email,
-    encode(digest(raw_token, 'sha256'), 'hex'),
+    encode(extensions.digest(raw_token, 'sha256'), 'hex'),
     current_user_id,
     invitation_expires_at
   );
@@ -170,7 +170,7 @@ as $$
     end
   from public.household_invitations hi
   join public.households h on h.id = hi.household_id
-  where hi.token_hash = encode(digest(p_token, 'sha256'), 'hex')
+  where hi.token_hash = encode(extensions.digest(p_token, 'sha256'), 'hex')
   limit 1;
 $$;
 
@@ -197,7 +197,7 @@ begin
   select *
     into invitation
   from public.household_invitations hi
-  where hi.token_hash = encode(digest(p_token, 'sha256'), 'hex')
+  where hi.token_hash = encode(extensions.digest(p_token, 'sha256'), 'hex')
   for update;
 
   if invitation.id is null then
