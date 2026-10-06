@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AcceptInvitationButton } from "@/components/invite/accept-invitation-button";
 import { SwitchAccountButton } from "@/components/invite/switch-account-button";
+import { getDefaultDisplayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "가족 초대" };
@@ -35,6 +36,7 @@ export default async function InvitePage({ searchParams }: { searchParams: Promi
 
   const next = `/invite?token=${encodeURIComponent(token)}`;
   const emailMatches = user?.email?.toLowerCase() === invitation.email.toLowerCase();
+  const defaultDisplayName = getDefaultDisplayName(user?.user_metadata.full_name, user?.email);
 
   return (
     <section className="invite-page">
@@ -54,7 +56,7 @@ export default async function InvitePage({ searchParams }: { searchParams: Promi
             <Link className="primary-button" href={`/login?next=${encodeURIComponent(next)}`}>로그인 또는 회원가입</Link>
           </div>
         ) : emailMatches ? (
-          <AcceptInvitationButton token={token} />
+          <AcceptInvitationButton token={token} defaultDisplayName={defaultDisplayName} />
         ) : (
           <div className="invite-mismatch" role="alert">
             <strong>로그인한 계정이 달라요.</strong>

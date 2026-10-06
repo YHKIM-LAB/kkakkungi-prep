@@ -1,11 +1,17 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { getDisplayNameError, normalizeDisplayName } from "@/lib/display-name";
 import { createClient } from "@/lib/supabase/server";
 
 export type InvitationState = {
   error: string | null;
   invitation: { token: string; email: string; expiresAt: string } | null;
 };
+
+export type DisplayNameState = { error: string | null };
 
 const initialErrorMap: Record<string, string> = {
   "Only a household owner can create invitations": "가족 공간의 owner만 초대할 수 있어요.",
@@ -105,4 +111,39 @@ export async function createInvitation(
       expiresAt: invitation.expires_at,
     },
   };
+}
+
+export async function updateOwnDisplayName(
+  _state: DisplayNameState,
+  formData: FormData,
+): Promise<DisplayNameState> {
+  const displayName = normalizeDisplayName(formData.get("displayName"));
+  const validationError = getDisplayNameError(displayName);
+
+  if (validationError) return { error: validationError };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: "로그인이 만료됐어요. 다시 로그인해 주세요." };
+
+  const { data: membership, error } = await supabase
+    .from("household_members")
+    .update({ display_name: displayName })
+    .eq("user_id", user.id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    return {
+      error: error.code === "42501"
+        ? "내 이름만 수정할 수 있어요."
+        : "이름을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.",
+    };
+  }
+
+  if (!membership) return { error: "가족 구성원 정보를 찾지 못했어요." };
+
+  revalidatePath("/family");
+  redirect("/family");
 }

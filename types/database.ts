@@ -194,7 +194,7 @@ export interface Database {
         Returns: { email: string; household_name: string; expires_at: string; status: string }[];
       };
       accept_household_invitation: {
-        Args: { p_token: string };
+        Args: { p_token: string; p_display_name: string };
         Returns: string;
       };
       is_household_member: {

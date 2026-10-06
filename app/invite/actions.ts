@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getDisplayNameError, normalizeDisplayName } from "@/lib/display-name";
 import { INVITE_CONTEXT_COOKIE } from "@/lib/invite-context";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,6 +16,8 @@ const messages: Array<[string, string]> = [
   ["Invitation email does not match", "현재 로그인한 이메일과 초대받은 이메일이 달라요."],
   ["User already belongs to a household", "이미 다른 가족 공간에 참여하고 있어요."],
   ["Invitation not found", "초대 링크를 찾을 수 없어요."],
+  ["Display name is required", "이름을 입력해 주세요."],
+  ["Display name is too long", "이름은 30자 이하로 입력해 주세요."],
 ];
 
 export async function acceptInvitation(
@@ -22,19 +25,28 @@ export async function acceptInvitation(
   formData: FormData,
 ): Promise<AcceptInvitationState> {
   const token = String(formData.get("token") ?? "");
+  const displayName = normalizeDisplayName(formData.get("displayName"));
 
   if (!token) return { error: "초대 링크에 token이 없어요." };
+  const displayNameError = getDisplayNameError(displayName);
+  if (displayNameError) return { error: displayNameError };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: "로그인 후 초대를 수락해 주세요." };
 
-  const { error } = await supabase.rpc("accept_household_invitation", { p_token: token });
+  const { error } = await supabase.rpc("accept_household_invitation", {
+    p_token: token,
+    p_display_name: displayName,
+  });
 
   if (error) {
     const translated = messages.find(([message]) => error.message.includes(message));
-    return { error: translated?.[1] ?? "초대를 수락하지 못했어요. 잠시 후 다시 시도해 주세요." };
+    const fallback = error.code === "PGRST202"
+      ? "초대 기능 업데이트가 데이터베이스에 아직 반영되지 않았어요."
+      : "초대를 수락하지 못했어요. 잠시 후 다시 시도해 주세요.";
+    return { error: translated?.[1] ?? fallback };
   }
 
   const cookieStore = await cookies();

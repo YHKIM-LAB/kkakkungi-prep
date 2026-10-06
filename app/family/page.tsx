@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { DisplayNameEditor } from "@/components/family/display-name-editor";
 import { InviteForm } from "@/components/family/invite-form";
 import { SectionCard } from "@/components/section-card";
 import { createClient } from "@/lib/supabase/server";
@@ -50,7 +51,11 @@ export default async function FamilyPage() {
           {(members ?? []).map((member) => (
             <li key={member.id}>
               <span className="member-avatar" aria-hidden="true">{member.display_name.slice(0, 1)}</span>
-              <div><strong>{member.display_name}</strong><span>{member.user_id === user.id ? "나" : "가족 구성원"}</span></div>
+              {member.user_id === user.id ? (
+                <DisplayNameEditor currentName={member.display_name} />
+              ) : (
+                <div><strong>{member.display_name}</strong><span>가족 구성원</span></div>
+              )}
               <span className={`role-badge role-badge--${member.role}`}>{member.role}</span>
             </li>
           ))}
