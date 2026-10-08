@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
-import { getSafePurchaseUrl, PURCHASE_STATUSES, SHOPPING_CATEGORIES, SHOPPING_PRIORITIES } from "@/lib/shopping";
+import { normalizePurchaseUrl, PURCHASE_STATUSES, SHOPPING_CATEGORIES, SHOPPING_PRIORITIES } from "@/lib/shopping";
 import type { PurchaseStatus, ShoppingPriority } from "@/types/database";
 
 export type ShoppingMutationState = { error: string | null; success: boolean };
@@ -57,10 +57,12 @@ function readShoppingFields(formData: FormData) {
     }
   }
 
-  if (purchaseUrlValue.length > 2_000) return { ok: false, error: "구매 링크가 너무 길어요." } as const;
-  const purchaseUrl = getSafePurchaseUrl(purchaseUrlValue);
-  if (purchaseUrlValue && !purchaseUrl) {
+  const purchaseUrl = normalizePurchaseUrl(purchaseUrlValue);
+  if (!purchaseUrl.ok) {
     return { ok: false, error: "구매 링크는 http 또는 https 주소만 사용할 수 있어요." } as const;
+  }
+  if (purchaseUrl.value && purchaseUrl.value.length > 2_000) {
+    return { ok: false, error: "구매 링크가 너무 길어요." } as const;
   }
 
   return {
@@ -71,7 +73,7 @@ function readShoppingFields(formData: FormData) {
       priority,
       purchase_status: purchaseStatus,
       price,
-      purchase_url: purchaseUrl,
+      purchase_url: purchaseUrl.value,
       memo: memo || null,
     },
   } as const;

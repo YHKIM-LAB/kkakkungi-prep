@@ -35,13 +35,39 @@ export function formatWon(value: number) {
   return `${new Intl.NumberFormat("ko-KR").format(value)}원`;
 }
 
-export function getSafePurchaseUrl(value: string | null) {
-  if (!value) return null;
+export function normalizePurchaseUrl(value: string | null) {
+  const trimmedValue = value?.trim() ?? "";
+  if (!trimmedValue) return { ok: true, value: null } as const;
+  if (/\s/.test(trimmedValue) || trimmedValue.startsWith("//") || trimmedValue.includes("\\")) {
+    return { ok: false, value: null } as const;
+  }
+
+  const hasHttpProtocol = /^https?:\/\//i.test(trimmedValue);
+  const hasExplicitScheme = /^[a-z][a-z\d+.-]*:/i.test(trimmedValue);
+  if (hasExplicitScheme && !hasHttpProtocol) return { ok: false, value: null } as const;
+
+  const normalizedValue = hasHttpProtocol ? trimmedValue : `https://${trimmedValue}`;
 
   try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+    const url = new URL(normalizedValue);
+    const hasAllowedProtocol = url.protocol === "http:" || url.protocol === "https:";
+    const domainLabels = url.hostname.split(".");
+    const hasValidDomain = domainLabels.length >= 2 && domainLabels.every((label) => (
+      label.length > 0
+      && /^[a-z\d-]+$/i.test(label)
+      && !label.startsWith("-")
+      && !label.endsWith("-")
+    ));
+
+    return hasAllowedProtocol && hasValidDomain
+      ? { ok: true, value: normalizedValue } as const
+      : { ok: false, value: null } as const;
   } catch {
-    return null;
+    return { ok: false, value: null } as const;
   }
+}
+
+export function getSafePurchaseUrl(value: string | null) {
+  const result = normalizePurchaseUrl(value);
+  return result.ok ? result.value : null;
 }

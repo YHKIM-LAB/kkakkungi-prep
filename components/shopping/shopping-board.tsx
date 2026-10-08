@@ -206,7 +206,7 @@ function ShoppingEditor({ item, onCancel, onSaved }: { item?: ShoppingItem; onCa
       <label>우선순위<select name="priority" defaultValue={item?.priority ?? "medium"}>{SHOPPING_PRIORITIES.map((priority) => <option key={priority} value={priority}>{SHOPPING_PRIORITY_LABELS[priority]}</option>)}</select></label>
       <label>구매 상태<select name="purchaseStatus" defaultValue={item?.purchase_status ?? "planned"}>{PURCHASE_STATUSES.map((status) => <option key={status} value={status}>{PURCHASE_STATUS_LABELS[status]}</option>)}</select></label>
       <label>가격<input name="price" type="number" inputMode="numeric" min={0} max={999999999999} step={1} defaultValue={item?.price ?? ""} placeholder="원 단위" /></label>
-      <label className="shopping-editor__wide">구매 링크<input name="purchaseUrl" type="url" inputMode="url" defaultValue={item?.purchase_url ?? ""} maxLength={2000} placeholder="https://example.com/product" /></label>
+      <label className="shopping-editor__wide">구매 링크<input name="purchaseUrl" type="text" inputMode="url" defaultValue={item?.purchase_url ?? ""} maxLength={2000} placeholder="예: samsung.com 또는 https://samsung.com" /></label>
       <label className="shopping-editor__wide">메모<textarea name="memo" defaultValue={item?.memo ?? ""} maxLength={2000} rows={3} placeholder="비교한 내용이나 가족과 공유할 메모를 적어 주세요." /></label>
       {state.error ? <p className="form-message shopping-editor__wide" role="alert">{state.error}</p> : null}
       <div className="shopping-editor__buttons shopping-editor__wide">
