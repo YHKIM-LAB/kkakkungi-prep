@@ -715,7 +715,6 @@ input[type="checkbox"] {
 
 .task-filter-chips button,
 .task-card__actions button,
-.task-editor__heading > button,
 .task-editor__buttons > button:first-child {
   min-height: 2.5rem;
   padding-inline: 0.85rem;
@@ -828,7 +827,7 @@ input[type="checkbox"] {
 .task-board-list .task-editor { border: 0; border-radius: 0; box-shadow: none; }
 .task-editor__wide { grid-column: 1 / -1; }
 
-.task-editor__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.task-editor__heading { display: grid; }
 .task-editor__heading .eyebrow { margin-bottom: 0.25rem; }
 .task-editor__heading h2 { margin: 0; font-size: 1.15rem; letter-spacing: -0.04em; }
 

@@ -177,10 +177,10 @@ function TaskEditor({
   return (
     <form className="task-editor card" action={formAction}>
       {task ? <input type="hidden" name="taskId" value={task.id} /> : null}
-      <div className="task-editor__heading task-editor__wide">
-        <div><span className="eyebrow">{task ? "할 일 다듬기" : "새로운 준비"}</span><h2>{task ? "할 일 수정" : "할 일 추가"}</h2></div>
-        <button type="button" onClick={onCancel}>닫기</button>
-      </div>
+      <header className="task-editor__heading task-editor__wide">
+        <span className="eyebrow">{task ? "할 일 다듬기" : "새로운 준비"}</span>
+        <h2>{task ? "할 일 수정" : "할 일 추가"}</h2>
+      </header>
       <label className="task-editor__wide">제목<input name="title" type="text" defaultValue={task?.title} maxLength={120} placeholder="예: 산부인과 예약하기" required /></label>
       <label>카테고리<select name="category" defaultValue={task?.category ?? "기타"}>{TASK_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</select></label>
       {task ? <label>상태<select name="status" defaultValue={task.status}>{TASK_STATUSES.map((status) => <option key={status} value={status}>{TASK_STATUS_LABELS[status]}</option>)}</select></label> : null}
