@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import { createTask, deleteTask, updateTask, updateTaskStatus, type TaskMutationState } from "@/app/tasks/actions";
 import { getPregnancyWeekForDate } from "@/lib/pregnancy";
@@ -15,12 +15,30 @@ export function TaskBoard({ tasks, profileDueDate }: { tasks: Task[]; profileDue
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [flashMessage, setFlashMessage] = useState<{ message: string } | null>(null);
   const filteredTasks = useMemo(() => tasks.filter((task) => (
     (statusFilter === "all" || task.status === statusFilter)
     && (categoryFilter === "all" || task.category === categoryFilter)
   )), [tasks, statusFilter, categoryFilter]);
   const doneCount = tasks.filter((task) => task.status === "done").length;
   const progress = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 0;
+
+  const handleCreated = useCallback(() => {
+    setIsAdding(false);
+    setFlashMessage({ message: "할 일을 추가했어요." });
+  }, []);
+
+  const handleUpdated = useCallback(() => {
+    setEditingId(null);
+    setFlashMessage({ message: "할 일을 저장했어요." });
+  }, []);
+
+  useEffect(() => {
+    if (!flashMessage) return;
+
+    const timeoutId = window.setTimeout(() => setFlashMessage(null), 3000);
+    return () => window.clearTimeout(timeoutId);
+  }, [flashMessage]);
 
   return (
     <>
@@ -53,14 +71,18 @@ export function TaskBoard({ tasks, profileDueDate }: { tasks: Task[]; profileDue
         </div>
       </section>
 
-      {isAdding ? <TaskEditor key={`create-${tasks.length}`} profileDueDate={profileDueDate} onCancel={() => setIsAdding(false)} /> : null}
+      {flashMessage ? <p className="task-flash" role="status" aria-live="polite">{flashMessage.message}</p> : null}
+
+      {isAdding ? (
+        <TaskEditor profileDueDate={profileDueDate} onCancel={() => setIsAdding(false)} onSaved={handleCreated} />
+      ) : null}
 
       {filteredTasks.length ? (
         <ul className="task-board-list">
           {filteredTasks.map((task) => (
-            <li key={`${task.id}-${task.updated_at}`} className={task.status === "done" ? "is-done" : undefined}>
+            <li key={task.id} className={task.status === "done" ? "is-done" : undefined}>
               {editingId === task.id ? (
-                <TaskEditor task={task} profileDueDate={profileDueDate} onCancel={() => setEditingId(null)} />
+                <TaskEditor task={task} profileDueDate={profileDueDate} onCancel={() => setEditingId(null)} onSaved={handleUpdated} />
               ) : (
                 <TaskCard task={task} onEdit={() => setEditingId(task.id)} />
               )}
@@ -118,11 +140,29 @@ function TaskCard({ task, onEdit }: { task: Task; onEdit: () => void }) {
   );
 }
 
-function TaskEditor({ task, profileDueDate, onCancel }: { task?: Task; profileDueDate: string | null; onCancel: () => void }) {
+function TaskEditor({
+  task,
+  profileDueDate,
+  onCancel,
+  onSaved,
+}: {
+  task?: Task;
+  profileDueDate: string | null;
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
   const action = task ? updateTask : createTask;
   const [state, formAction, isPending] = useActionState(action, initialMutationState);
   const [dueDate, setDueDate] = useState(task?.due_date ?? "");
   const [pregnancyWeek, setPregnancyWeek] = useState(task?.pregnancy_week?.toString() ?? "");
+  const handledSuccess = useRef(false);
+
+  useEffect(() => {
+    if (!state.success || handledSuccess.current) return;
+
+    handledSuccess.current = true;
+    onSaved();
+  }, [state.success, onSaved]);
 
   function handleDueDateChange(value: string) {
     setDueDate(value);
@@ -148,7 +188,6 @@ function TaskEditor({ task, profileDueDate, onCancel }: { task?: Task; profileDu
       <label>임신 주차<input name="pregnancyWeek" type="number" min={0} max={45} value={pregnancyWeek} onChange={(event) => setPregnancyWeek(event.target.value)} placeholder="자동 계산" /></label>
       <label className="task-editor__wide">메모<textarea name="memo" defaultValue={task?.memo ?? ""} maxLength={2000} rows={3} placeholder="가족과 공유할 내용을 적어 주세요." /></label>
       {state.error ? <p className="form-message task-editor__wide" role="alert">{state.error}</p> : null}
-      {state.success ? <p className="form-success task-editor__wide" role="status">저장했어요.</p> : null}
       <div className="task-editor__buttons task-editor__wide">
         <button type="button" onClick={onCancel}>취소</button>
         <button className="primary-button" type="submit" disabled={isPending}>{isPending ? "저장 중…" : "저장"}</button>
