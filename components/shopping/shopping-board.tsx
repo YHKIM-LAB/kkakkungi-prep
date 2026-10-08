@@ -1,6 +1,17 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import {
   createShoppingItem,
@@ -133,9 +144,25 @@ function FilterButton({ active, onClick, children }: { active: boolean; onClick:
 }
 
 function ShoppingCard({ item, onEdit }: { item: ShoppingItem; onEdit: () => void }) {
-  const [statusState, statusAction, isStatusPending] = useActionState(updatePurchaseStatus, initialMutationState);
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic(item.purchase_status);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [isStatusPending, startStatusTransition] = useTransition();
   const [deleteState, deleteAction, isDeletePending] = useActionState(deleteShoppingItem, initialMutationState);
   const purchaseUrl = getSafePurchaseUrl(item.purchase_url);
+
+  function handleStatusChange(purchaseStatus: PurchaseStatus) {
+    const formData = new FormData();
+    formData.set("itemId", item.id);
+    formData.set("purchaseStatus", purchaseStatus);
+    setStatusError(null);
+
+    startStatusTransition(async () => {
+      setOptimisticStatus(purchaseStatus);
+      const result = await updatePurchaseStatus(initialMutationState, formData);
+
+      if (!result.success) setStatusError(result.error);
+    });
+  }
 
   function confirmDelete(event: FormEvent<HTMLFormElement>) {
     if (!window.confirm("이 준비물을 삭제할까요?")) event.preventDefault();
@@ -148,18 +175,14 @@ function ShoppingCard({ item, onEdit }: { item: ShoppingItem; onEdit: () => void
           <span className="shopping-category">{item.category}</span>
           <h2>{item.item_name}</h2>
         </div>
-        <form action={statusAction}>
-          <input type="hidden" name="itemId" value={item.id} />
-          <select
-            name="purchaseStatus"
-            defaultValue={item.purchase_status}
-            aria-label={`${item.item_name} 구매 상태`}
-            disabled={isStatusPending}
-            onChange={(event) => event.currentTarget.form?.requestSubmit()}
-          >
-            {PURCHASE_STATUSES.map((status) => <option key={status} value={status}>{PURCHASE_STATUS_LABELS[status]}</option>)}
-          </select>
-        </form>
+        <select
+          value={optimisticStatus}
+          aria-label={`${item.item_name} 구매 상태`}
+          disabled={isStatusPending}
+          onChange={(event) => handleStatusChange(event.target.value as PurchaseStatus)}
+        >
+          {PURCHASE_STATUSES.map((status) => <option key={status} value={status}>{PURCHASE_STATUS_LABELS[status]}</option>)}
+        </select>
       </div>
       <div className="shopping-card__meta">
         <span data-priority={item.priority}>{SHOPPING_PRIORITY_LABELS[item.priority]}</span>
@@ -169,7 +192,7 @@ function ShoppingCard({ item, onEdit }: { item: ShoppingItem; onEdit: () => void
       {purchaseUrl ? (
         <a className="shopping-link" href={purchaseUrl} target="_blank" rel="noopener noreferrer">상품 보기 ↗</a>
       ) : null}
-      {statusState.error ? <p className="form-message" role="alert">{statusState.error}</p> : null}
+      {statusError ? <p className="form-message" role="alert">{statusError}</p> : null}
       {deleteState.error ? <p className="form-message" role="alert">{deleteState.error}</p> : null}
       <div className="shopping-card__actions">
         <button type="button" onClick={onEdit}>수정</button>

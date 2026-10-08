@@ -979,7 +979,7 @@ input[type="checkbox"] {
 }
 
 .shopping-card__topline > div { min-width: 0; }
-.shopping-card__topline form { flex: none; }
+.shopping-card__topline > select { flex: none; }
 .shopping-card__topline select { min-height: 2.3rem; padding: 0.4rem 1.8rem 0.4rem 0.65rem; font-size: 0.72rem; font-weight: 800; }
 
 .shopping-category {
