@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { SectionCard } from "@/components/section-card";
 import { getPregnancyProgress } from "@/lib/pregnancy";
+import { sortShoppingItems } from "@/lib/shopping";
 import { createClient } from "@/lib/supabase/server";
 import { formatTaskDate, sortTasks, TASK_STATUS_LABELS } from "@/lib/tasks";
 
@@ -31,9 +32,10 @@ export default async function HomePage() {
     redirect("/setup");
   }
 
-  const [{ data: profile }, { data: tasks, error: tasksError }] = await Promise.all([
+  const [{ data: profile }, { data: tasks, error: tasksError }, { data: shoppingItems, error: shoppingError }] = await Promise.all([
     supabase.from("pregnancy_profile").select().eq("household_id", membership.household_id).maybeSingle(),
     supabase.from("tasks").select().eq("household_id", membership.household_id),
+    supabase.from("shopping_items").select().eq("household_id", membership.household_id),
   ]);
 
   if (!profile) {
@@ -46,6 +48,9 @@ export default async function HomePage() {
   const upcomingTasks = sortTasks(allTasks.filter((task) => task.status !== "done")).slice(0, 3);
   const completedTaskCount = allTasks.filter((task) => task.status === "done").length;
   const taskProgress = allTasks.length ? Math.round((completedTaskCount / allTasks.length) * 100) : 0;
+  const allShoppingItems = shoppingItems ?? [];
+  const purchasedItemCount = allShoppingItems.filter((item) => item.purchase_status === "purchased").length;
+  const shoppingPreview = sortShoppingItems(allShoppingItems.filter((item) => item.purchase_status !== "purchased")).slice(0, 2);
 
   return (
     <div className="dashboard">
@@ -137,8 +142,14 @@ export default async function HomePage() {
           <Link href="/shopping" className="metric-card metric-card--peach">
             <span className="metric-card__icon" aria-hidden="true">⌂</span>
             <span>구매 준비</span>
-            <strong>12 <small>/ 64개</small></strong>
-            <em>52개 남았어요</em>
+            <strong>{shoppingError ? "-" : purchasedItemCount} <small>/ {shoppingError ? "-" : allShoppingItems.length}개</small></strong>
+            <em>{shoppingError
+              ? "준비물을 불러오지 못했어요"
+              : shoppingPreview.length
+                ? `다음: ${shoppingPreview.map((item) => item.item_name).join(", ")}`
+                : allShoppingItems.length
+                  ? "모두 준비했어요"
+                  : "첫 준비물을 추가해 보세요"}</em>
           </Link>
           <Link href="/expenses" className="metric-card metric-card--yellow">
             <span className="metric-card__icon" aria-hidden="true">₩</span>
