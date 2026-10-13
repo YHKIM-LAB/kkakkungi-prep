@@ -1,32 +1,20 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { PageHeading } from "@/components/page-heading";
-import { SectionCard } from "@/components/section-card";
+import { ScheduleBoard } from "@/components/schedule/schedule-board";
+import { createClient } from "@/lib/supabase/server";
 
-const schedules = [
-  { week: "8주", date: "10월 8일", title: "산부인과 정기 진료", note: "오전 10:30 · 햇살여성병원", active: true },
-  { week: "10주", date: "10월 22일", title: "NIPT 검사 여부 결정", note: "검사 항목과 비용 함께 검토", active: false },
-  { week: "12주", date: "11월 5일", title: "1차 기형아 검사", note: "예약 시간 다시 확인하기", active: false },
-  { week: "16주", date: "12월 3일", title: "2차 정기 진료", note: "일정 확정 전", active: false },
-];
+export const metadata: Metadata = { title: "일정" };
 
-export default function SchedulePage() {
-  return (
-    <div className="subpage">
-      <PageHeading eyebrow="다가오는 순간들" title="일정" description="진료와 검사를 임신 주차 흐름에 맞춰 확인해요." />
-      <SectionCard title="임신 일정 타임라인" description="다음 진료까지 5일 남았어요">
-        <ol className="timeline">
-          {schedules.map((schedule) => (
-            <li key={schedule.title} className={schedule.active ? "is-active" : undefined}>
-              <div className="timeline__week">{schedule.week}</div>
-              <div className="timeline__marker" aria-hidden="true"><span /></div>
-              <div className="timeline__content">
-                <time>{schedule.date}</time>
-                <strong>{schedule.title}</strong>
-                <p>{schedule.note}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </SectionCard>
-    </div>
-  );
+export default async function SchedulePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/schedule");
+  const { data: membership } = await supabase.from("household_members").select("household_id").eq("user_id", user.id).maybeSingle();
+  if (!membership) redirect("/setup");
+  const { data: schedules, error } = await supabase.from("schedules").select().eq("household_id", membership.household_id).order("date", { ascending: true });
+  return <div className="subpage schedule-page">
+    <PageHeading eyebrow="다가오는 순간들" title="일정" description="진료, 검사, 예약과 준비 일정을 가족과 함께 관리해요." />
+    {error ? <div className="card schedule-empty" role="alert">일정 목록을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.</div> : <ScheduleBoard items={schedules ?? []} />}
+  </div>;
 }
