@@ -28,7 +28,7 @@ function Entry({ item }: { item: Schedule }) {
   function confirmDelete(event: FormEvent<HTMLFormElement>) {
     if (!window.confirm("이 일정을 삭제할까요?")) event.preventDefault();
   }
-  if (editing) return <li><Editor item={item} cancel={() => setEditing(false)} done={() => setEditing(false)} /></li>;
+  if (editing) return <li className="schedule-editing"><Editor item={item} cancel={() => setEditing(false)} done={() => setEditing(false)} /></li>;
   return <li className="schedule-entry">
     <div className="timeline__week">{item.pregnancy_week === null ? "일정" : item.pregnancy_week + "주"}</div>
     <div className="timeline__marker" aria-hidden="true"><span /></div>
