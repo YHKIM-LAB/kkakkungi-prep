@@ -1729,3 +1729,24 @@ input[type="checkbox"] {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
+
+
+/* Schedule CRUD */
+.schedule-board { display: grid; gap: 1rem; }
+.schedule-add { justify-self: end; padding: 0.8rem 1.15rem; }
+.schedule-form { display: grid; gap: 0.85rem; }
+.schedule-form label { display: grid; gap: 0.4rem; color: #4d5a55; font-size: 0.76rem; font-weight: 800; }
+.schedule-form input, .schedule-form select, .schedule-form textarea { width: 100%; min-width: 0; min-height: 2.8rem; padding: 0.65rem 0.8rem; border: 1px solid #ddd5cd; border-radius: 0.8rem; color: var(--ink); background: white; font: inherit; }
+.schedule-form textarea { resize: vertical; }
+.schedule-form__buttons { display: flex; justify-content: flex-end; gap: 0.6rem; }
+.schedule-form__buttons button { min-height: 2.7rem; padding-inline: 1.1rem; border-radius: 0.8rem; cursor: pointer; }
+.schedule-form__buttons button:first-child { border: 1px solid #ddd5cd; background: white; }
+.schedule-empty { padding: 1.5rem; color: var(--muted); }
+.schedule-page .timeline { margin: 0; padding: 0; list-style: none; }
+.schedule-page .timeline li { grid-template-columns: 2.8rem 1.5rem minmax(0, 1fr); }
+.schedule-page .timeline__content { min-width: 0; padding-bottom: 1.2rem; }
+.schedule-category { color: var(--muted); font-size: 0.75rem; }
+.schedule-memo { white-space: pre-wrap; overflow-wrap: anywhere; }
+.schedule-item-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+.schedule-item-actions button { padding: 0.3rem 0.65rem; border: 1px solid #ddd5cd; border-radius: 0.55rem; background: white; color: var(--muted); cursor: pointer; font-size: 0.75rem; }
+.dashboard__schedule .schedule-list p { white-space: pre-line; overflow-wrap: anywhere; }
