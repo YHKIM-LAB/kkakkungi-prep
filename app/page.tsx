@@ -7,12 +7,6 @@ import { sortShoppingItems } from "@/lib/shopping";
 import { createClient } from "@/lib/supabase/server";
 import { formatTaskDate, sortTasks, TASK_STATUS_LABELS } from "@/lib/tasks";
 
-const upcomingSchedules = [
-  { date: "10.08", weekday: "목", title: "다음 산부인과 진료", note: "오전 10:30 · 햇살여성병원" },
-  { date: "10.22", weekday: "목", title: "NIPT 검토", note: "10주차 · 검사 여부 결정" },
-  { date: "11.05", weekday: "목", title: "1차 기형아 검사", note: "12주차 · 예약 확인 필요" },
-];
-
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -32,10 +26,11 @@ export default async function HomePage() {
     redirect("/setup");
   }
 
-  const [{ data: profile }, { data: tasks, error: tasksError }, { data: shoppingItems, error: shoppingError }] = await Promise.all([
+  const [{ data: profile }, { data: tasks, error: tasksError }, { data: shoppingItems, error: shoppingError }, { data: schedules, error: schedulesError }] = await Promise.all([
     supabase.from("pregnancy_profile").select().eq("household_id", membership.household_id).maybeSingle(),
     supabase.from("tasks").select().eq("household_id", membership.household_id),
     supabase.from("shopping_items").select().eq("household_id", membership.household_id),
+    supabase.from("schedules").select().eq("household_id", membership.household_id).gte("date", new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())).order("date", { ascending: true }).limit(3),
   ]);
 
   if (!profile) {
@@ -49,6 +44,7 @@ export default async function HomePage() {
   const completedTaskCount = allTasks.filter((task) => task.status === "done").length;
   const taskProgress = allTasks.length ? Math.round((completedTaskCount / allTasks.length) * 100) : 0;
   const allShoppingItems = shoppingItems ?? [];
+  const upcomingSchedules = schedules ?? [];
   const purchasedItemCount = allShoppingItems.filter((item) => item.purchase_status === "purchased").length;
   const shoppingPreview = sortShoppingItems(allShoppingItems.filter((item) => item.purchase_status !== "purchased")).slice(0, 2);
 
@@ -103,25 +99,26 @@ export default async function HomePage() {
 
         <SectionCard
           title="다음 주요 일정"
-          description="가까운 일정을 미리 확인해요"
+          description={schedulesError ? "일정을 불러오지 못했어요" : "가까운 일정을 미리 확인해요"}
           trailing={<Link className="text-link" href="/schedule">전체 보기</Link>}
           className="dashboard__schedule"
         >
           <ol className="schedule-list">
             {upcomingSchedules.map((schedule, index) => (
-              <li key={schedule.title}>
+              <li key={schedule.id}>
                 <div className="schedule-date">
-                  <strong>{schedule.date}</strong>
-                  <span>{schedule.weekday}</span>
+                  <strong>{schedule.date.slice(5).replace("-", ".")}</strong>
+                  <span>{schedule.category}</span>
                 </div>
                 <div className="schedule-line" aria-hidden="true"><span>{index + 1}</span></div>
                 <div>
                   <strong>{schedule.title}</strong>
-                  <p>{schedule.note}</p>
+                  <p>{schedule.memo ?? (schedule.pregnancy_week === null ? "상세 내용 없음" : `임신 ${schedule.pregnancy_week}주`)}</p>
                 </div>
               </li>
             ))}
           </ol>
+          {schedulesError ? <p className="dashboard-empty" role="alert">일정을 불러오지 못했어요.</p> : !upcomingSchedules.length ? <p className="dashboard-empty">다가오는 일정이 없어요. 일정을 추가해 보세요.</p> : null}
         </SectionCard>
 
         <SectionCard title="출산 준비 진행률" description="등록된 할 일 완료 기준" className="dashboard__progress">
