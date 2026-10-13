@@ -1750,3 +1750,5 @@ input[type="checkbox"] {
 .schedule-item-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
 .schedule-item-actions button { padding: 0.3rem 0.65rem; border: 1px solid #ddd5cd; border-radius: 0.55rem; background: white; color: var(--muted); cursor: pointer; font-size: 0.75rem; }
 .dashboard__schedule .schedule-list p { white-space: pre-line; overflow-wrap: anywhere; }
+
+.schedule-page .timeline li.schedule-editing { display: block; min-height: 0; padding-block: 0.5rem 1rem; }
