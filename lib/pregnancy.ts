@@ -23,6 +23,11 @@ export function isValidDateOnly(value: string) {
   }
 }
 
+export function getKstDateOnly(now = new Date()) {
+  const koreaNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  return formatDateOnly(new Date(Date.UTC(koreaNow.getUTCFullYear(), koreaNow.getUTCMonth(), koreaNow.getUTCDate())));
+}
+
 export function getPregnancyStartDate(dueDate: string) {
   const startDate = parseDateOnly(dueDate);
   startDate.setUTCDate(startDate.getUTCDate() - FULL_TERM_DAYS);
@@ -31,8 +36,7 @@ export function getPregnancyStartDate(dueDate: string) {
 
 export function getPregnancyProgress(dueDate: string, now = new Date()) {
   const due = parseDateOnly(dueDate);
-  const koreaNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const today = new Date(Date.UTC(koreaNow.getUTCFullYear(), koreaNow.getUTCMonth(), koreaNow.getUTCDate()));
+  const today = parseDateOnly(getKstDateOnly(now));
   const daysUntilDue = Math.ceil((due.getTime() - today.getTime()) / DAY_IN_MS);
   const elapsedDays = Math.max(0, Math.min(FULL_TERM_DAYS, FULL_TERM_DAYS - daysUntilDue));
 

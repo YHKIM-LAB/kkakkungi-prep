@@ -28,3 +28,8 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# playwright
+/playwright/.auth/
+/playwright-report/
+/test-results/

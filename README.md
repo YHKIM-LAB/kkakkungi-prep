@@ -32,6 +32,28 @@ npm run lint
 npm run build
 ```
 
+## 브라우저 E2E
+
+Playwright 테스트는 모바일 준비물 카드와 일정 생성·수정·홈 연동·삭제를 검증합니다. 테스트 계정은 별도 가족 공간에 연결된 계정을 사용하고, 자격증명은 저장소에 커밋하지 않습니다.
+
+```powershell
+npm run test:e2e:install
+$env:E2E_EMAIL="..."
+$env:E2E_PASSWORD="..."
+npm run test:e2e
+```
+
+배포된 환경을 검사할 때는 `PLAYWRIGHT_BASE_URL`도 지정합니다.
+
+```powershell
+$env:PLAYWRIGHT_BASE_URL="https://kkakkungi-prep.vercel.app"
+$env:E2E_EMAIL="..."
+$env:E2E_PASSWORD="..."
+npm run test:e2e
+```
+
+일정 CRUD 테스트는 실행마다 고유한 `E2E-YYYYMMDD-...` 접두어 일정 한 건만 만들고, 성공·실패와 관계없이 같은 접두어의 단일 항목만 정리합니다. 대상이 둘 이상이면 기존 데이터 보호를 위해 삭제하지 않고 실패합니다.
+
 ## 환경변수
 
 `.env.local.example`을 `.env.local`로 복사한 뒤 Supabase 프로젝트의 값을 입력합니다.

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { SectionCard } from "@/components/section-card";
-import { getPregnancyProgress } from "@/lib/pregnancy";
+import { getKstDateOnly, getPregnancyProgress } from "@/lib/pregnancy";
 import { sortShoppingItems } from "@/lib/shopping";
 import { createClient } from "@/lib/supabase/server";
 import { formatTaskDate, sortTasks, TASK_STATUS_LABELS } from "@/lib/tasks";
@@ -30,7 +30,7 @@ export default async function HomePage() {
     supabase.from("pregnancy_profile").select().eq("household_id", membership.household_id).maybeSingle(),
     supabase.from("tasks").select().eq("household_id", membership.household_id),
     supabase.from("shopping_items").select().eq("household_id", membership.household_id),
-    supabase.from("schedules").select().eq("household_id", membership.household_id).gte("date", new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10)).order("date", { ascending: true }).limit(3),
+    supabase.from("schedules").select().eq("household_id", membership.household_id).gte("date", getKstDateOnly()).order("date", { ascending: true }).limit(3),
   ]);
 
   if (!profile) {
