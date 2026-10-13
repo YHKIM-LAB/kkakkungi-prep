@@ -1178,6 +1178,41 @@ input[type="checkbox"] {
 
 .expense-list > li > strong { font-size: 0.82rem; }
 
+.expense-board { display: grid; gap: 1rem; }
+.expense-add { justify-self: end; padding: 0.8rem 1.15rem; }
+.expense-card { padding: 1.2rem; }
+.expense-form { display: grid; gap: 0.9rem; }
+.expense-form__grid { display: grid; gap: 0.85rem; }
+.expense-form label { display: grid; gap: 0.4rem; color: #4d5a55; font-size: 0.76rem; font-weight: 800; }
+.expense-form input,
+.expense-form select,
+.expense-form textarea { width: 100%; min-width: 0; min-height: 2.8rem; padding: 0.65rem 0.8rem; border: 1px solid #ddd5cd; border-radius: 0.8rem; color: var(--ink); background: white; font: inherit; }
+.expense-form textarea { resize: vertical; }
+.expense-form__amount { position: relative; display: block; }
+.expense-form__amount input { padding-right: 2.2rem; }
+.expense-form__amount > span { position: absolute; top: 50%; right: 0.8rem; color: var(--muted); transform: translateY(-50%); }
+.expense-form__paid { display: flex !important; align-items: center; align-self: end; min-height: 2.8rem; padding: 0.65rem 0.8rem; border: 1px solid #ddd5cd; border-radius: 0.8rem; background: #fffdf8; cursor: pointer; }
+.expense-form__paid input { width: 1rem; min-height: 1rem; margin: 0; accent-color: var(--green); }
+.expense-form__buttons { display: flex; justify-content: flex-end; gap: 0.6rem; }
+.expense-form__buttons button { min-height: 2.7rem; padding-inline: 1.1rem; border-radius: 0.8rem; cursor: pointer; }
+.expense-form__buttons button:first-child { border: 1px solid #ddd5cd; background: white; }
+.expense-list li { align-items: flex-start; padding-block: 0.95rem; }
+.expense-list li.is-paid .expense-dot { background: var(--green); }
+.expense-entry__details { min-width: 0; }
+.expense-entry__details p { margin: 0; color: var(--muted); font-size: 0.75rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+.expense-entry__amount { flex: none; padding-top: 0.05rem; }
+.expense-entry__actions { display: flex !important; flex: none !important; flex-wrap: wrap; gap: 0.4rem !important; margin-top: 0.35rem; }
+.expense-entry__actions form { display: contents; }
+.expense-entry__actions button { padding: 0.3rem 0.6rem; border: 1px solid #ddd5cd; border-radius: 0.55rem; color: var(--muted); background: white; cursor: pointer; font-size: 0.72rem; }
+.expense-entry__actions button:disabled { cursor: wait; opacity: 0.6; }
+.expense-editing { display: block !important; }
+.expense-empty { margin: 0; padding: 1.2rem 0; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+
+@media (min-width: 640px) {
+  .expense-form__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .expense-form__wide { grid-column: 1 / -1; }
+}
+
 .auth-page,
 .setup-page {
   min-height: calc(100vh - 8rem);

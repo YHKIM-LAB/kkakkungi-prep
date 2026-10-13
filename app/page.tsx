@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { SectionCard } from "@/components/section-card";
+import { getExpenseSummary } from "@/lib/expenses";
 import { getKstDateOnly, getPregnancyProgress } from "@/lib/pregnancy";
-import { sortShoppingItems } from "@/lib/shopping";
+import { formatWon, sortShoppingItems } from "@/lib/shopping";
 import { createClient } from "@/lib/supabase/server";
 import { formatTaskDate, sortTasks, TASK_STATUS_LABELS } from "@/lib/tasks";
 
@@ -26,11 +27,12 @@ export default async function HomePage() {
     redirect("/setup");
   }
 
-  const [{ data: profile }, { data: tasks, error: tasksError }, { data: shoppingItems, error: shoppingError }, { data: schedules, error: schedulesError }] = await Promise.all([
+  const [{ data: profile }, { data: tasks, error: tasksError }, { data: shoppingItems, error: shoppingError }, { data: schedules, error: schedulesError }, { data: expenses, error: expensesError }] = await Promise.all([
     supabase.from("pregnancy_profile").select().eq("household_id", membership.household_id).maybeSingle(),
     supabase.from("tasks").select().eq("household_id", membership.household_id),
     supabase.from("shopping_items").select().eq("household_id", membership.household_id),
     supabase.from("schedules").select().eq("household_id", membership.household_id).gte("date", getKstDateOnly()).order("date", { ascending: true }).limit(3),
+    supabase.from("expenses").select().eq("household_id", membership.household_id),
   ]);
 
   if (!profile) {
@@ -47,6 +49,7 @@ export default async function HomePage() {
   const upcomingSchedules = schedules ?? [];
   const purchasedItemCount = allShoppingItems.filter((item) => item.purchase_status === "purchased").length;
   const shoppingPreview = sortShoppingItems(allShoppingItems.filter((item) => item.purchase_status !== "purchased")).slice(0, 2);
+  const expenseSummary = getExpenseSummary(expenses ?? []);
 
   return (
     <div className="dashboard">
@@ -151,8 +154,8 @@ export default async function HomePage() {
           <Link href="/expenses" className="metric-card metric-card--yellow">
             <span className="metric-card__icon" aria-hidden="true">₩</span>
             <span>예상 비용</span>
-            <strong>4,820,000<small>원</small></strong>
-            <em>현재 지출 680,000원</em>
+            <strong>{expensesError ? "-" : formatWon(expenseSummary.total).replace("원", "")}<small>원</small></strong>
+            <em>{expensesError ? "비용을 불러오지 못했어요" : `현재 지출 ${formatWon(expenseSummary.paid)}`}</em>
           </Link>
         </div>
       </div>
