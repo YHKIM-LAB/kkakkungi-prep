@@ -41,7 +41,7 @@ async function save(state: ScheduleActionState, data: FormData, editing: boolean
     const { data: changed, error } = await ctx.supabase.from("schedules").update(values).eq("id", id).eq("household_id", ctx.householdId).select("id").maybeSingle();
     if (error || !changed) return fail("일정 수정에 실패했어요.");
   } else {
-    const { error } = await ctx.supabase.from("schedules").insert({ ...values, household_id: ctx.householdId, created_by: ctx.userId });
+    const { error } = await ctx.supabase.from("schedules").insert({ ...values, household_id: ctx.householdId });
     if (error) return fail("일정을 추가하지 못했어요.");
   }
   revalidatePath("/schedule");
