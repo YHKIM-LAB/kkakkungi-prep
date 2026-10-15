@@ -90,6 +90,7 @@ function logShoppingError(operation: string, error: { message: string; code?: st
 
 function revalidateShopping() {
   revalidatePath("/shopping");
+  revalidatePath("/expenses");
   revalidatePath("/");
 }
 

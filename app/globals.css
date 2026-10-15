@@ -1220,6 +1220,10 @@ input[type="checkbox"] {
 .expense-entry__actions button:disabled { cursor: wait; opacity: 0.6; }
 .expense-editing { display: block !important; }
 .expense-empty { margin: 0; padding: 1.2rem 0; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+.expense-linked { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.45rem; }
+.expense-linked > span { border-radius: 0.5rem; padding: 0.25rem 0.5rem; color: #35634d; background: #e8f3ec; font-size: 0.7rem; }
+.expense-linked a { font-size: 0.75rem; }
+.shopping-cost-note { margin: 0; color: var(--muted); font-size: 0.75rem; line-height: 1.6; }
 
 @media (min-width: 640px) {
   .expense-form__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -74,6 +74,7 @@ async function saveExpense(data: FormData, editing: boolean): Promise<ExpenseAct
       .update(parsed.value)
       .eq("id", id)
       .eq("household_id", context.householdId)
+      .is("shopping_item_id", null)
       .select("id")
       .maybeSingle();
 
@@ -112,6 +113,7 @@ export async function toggleExpensePaid(_state: ExpenseActionState, data: FormDa
     .update({ paid: paid === "true" })
     .eq("id", id)
     .eq("household_id", context.householdId)
+    .is("shopping_item_id", null)
     .select("id")
     .maybeSingle();
 
@@ -134,6 +136,7 @@ export async function deleteExpense(_state: ExpenseActionState, data: FormData):
     .delete()
     .eq("id", id)
     .eq("household_id", context.householdId)
+    .is("shopping_item_id", null)
     .select("id")
     .maybeSingle();
 

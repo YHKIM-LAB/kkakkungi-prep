@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useState, type FormEvent } from "react";
 
 import {
@@ -88,7 +89,12 @@ function ExpenseEntry({ item }: { item: Expense }) {
         {item.memo ? <p>{item.memo}</p> : null}
         {toggleState.error ? <p className="form-message" role="alert">{toggleState.error}</p> : null}
         {deleteState.error ? <p className="form-message" role="alert">{deleteState.error}</p> : null}
-        <div className="expense-entry__actions">
+        {item.shopping_item_id ? (
+          <div className="expense-linked">
+            <span>준비물에서 자동 등록</span>
+            <Link className="text-link" href="/shopping">준비물에서 수정</Link>
+          </div>
+        ) : <div className="expense-entry__actions">
           <form action={toggleAction}>
             <input name="id" type="hidden" value={item.id} />
             <input name="paid" type="hidden" value={String(!item.paid)} />
@@ -99,7 +105,7 @@ function ExpenseEntry({ item }: { item: Expense }) {
             <input name="id" type="hidden" value={item.id} />
             <button type="submit" disabled={deleting}>삭제</button>
           </form>
-        </div>
+        </div>}
       </div>
       <strong className="expense-entry__amount">{formatWon(item.amount)}</strong>
     </li>
@@ -131,7 +137,7 @@ export function ExpenseBoard({ items }: { items: Expense[] }) {
 
       <section className="card expense-card" aria-labelledby="expense-list-title">
         <div className="card__header">
-          <div><h2 id="expense-list-title">비용 목록</h2><p>예정 비용과 결제 내역을 함께 관리해요</p></div>
+          <div><h2 id="expense-list-title">비용 목록</h2><p>준비물 가격과 직접 등록한 비용을 함께 집계해요. 가격 미정인 준비물은 제외돼요.</p></div>
         </div>
         {items.length ? (
           <ul className="expense-list">{items.map((item) => <ExpenseEntry key={item.id} item={item} />)}</ul>

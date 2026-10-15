@@ -26,6 +26,7 @@ export type Database = {
           memo: string | null
           paid: boolean
           payment_date: string | null
+          shopping_item_id: string | null
           title: string
           updated_at: string
         }
@@ -39,6 +40,7 @@ export type Database = {
           memo?: string | null
           paid?: boolean
           payment_date?: string | null
+          shopping_item_id?: string | null
           title: string
           updated_at?: string
         }
@@ -52,6 +54,7 @@ export type Database = {
           memo?: string | null
           paid?: boolean
           payment_date?: string | null
+          shopping_item_id?: string | null
           title?: string
           updated_at?: string
         }
@@ -61,6 +64,13 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_shopping_item_id_fkey"
+            columns: ["shopping_item_id"]
+            isOneToOne: true
+            referencedRelation: "shopping_items"
             referencedColumns: ["id"]
           },
         ]

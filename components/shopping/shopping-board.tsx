@@ -152,6 +152,8 @@ function ShoppingCard({ item, onEdit }: { item: ShoppingItem; onEdit: () => void
   const purchaseUrl = getSafePurchaseUrl(item.purchase_url);
 
   function handleStatusChange(purchaseStatus: PurchaseStatus) {
+    if (item.purchase_status === "purchased" && purchaseStatus !== "purchased"
+      && !window.confirm("구매 완료를 취소하면 연결된 비용도 미결제로 바뀌어요. 변경할까요?")) return;
     const formData = new FormData();
     formData.set("itemId", item.id);
     formData.set("purchaseStatus", purchaseStatus);
@@ -166,7 +168,7 @@ function ShoppingCard({ item, onEdit }: { item: ShoppingItem; onEdit: () => void
   }
 
   function confirmDelete(event: FormEvent<HTMLFormElement>) {
-    if (!window.confirm("이 준비물을 삭제할까요?")) event.preventDefault();
+    if (!window.confirm("이 준비물을 삭제할까요? 연결된 비용 기록은 남고, 이후 비용 화면에서 수정·삭제할 수 있어요.")) event.preventDefault();
   }
 
   return (
@@ -218,8 +220,18 @@ function ShoppingEditor({ item, onCancel, onSaved }: { item?: ShoppingItem; onCa
     onSaved();
   }, [state.success, onSaved]);
 
+  function confirmCostChange(event: FormEvent<HTMLFormElement>) {
+    if (!item) return;
+    const data = new FormData(event.currentTarget);
+    if (item.price !== null && !String(data.get("price") ?? "").trim()) {
+      if (!window.confirm("가격을 지우면 연결된 비용이 삭제되고 합계에서도 제외돼요. 계속할까요?")) event.preventDefault();
+    } else if (item.purchase_status === "purchased" && data.get("purchaseStatus") !== "purchased") {
+      if (!window.confirm("구매 완료를 취소하면 연결된 비용도 미결제로 바뀌어요. 변경할까요?")) event.preventDefault();
+    }
+  }
+
   return (
-    <form className="shopping-editor card" action={formAction}>
+    <form className="shopping-editor card" action={formAction} onSubmit={confirmCostChange}>
       {item ? <input type="hidden" name="itemId" value={item.id} /> : null}
       <header className="shopping-editor__heading shopping-editor__wide">
         <span className="eyebrow">{item ? "준비물 다듬기" : "새로운 준비"}</span>
@@ -230,6 +242,7 @@ function ShoppingEditor({ item, onCancel, onSaved }: { item?: ShoppingItem; onCa
       <label>우선순위<select name="priority" defaultValue={item?.priority ?? "medium"}>{SHOPPING_PRIORITIES.map((priority) => <option key={priority} value={priority}>{SHOPPING_PRIORITY_LABELS[priority]}</option>)}</select></label>
       <label>구매 상태<select name="purchaseStatus" defaultValue={item?.purchase_status ?? "planned"}>{PURCHASE_STATUSES.map((status) => <option key={status} value={status}>{PURCHASE_STATUS_LABELS[status]}</option>)}</select></label>
       <label>가격<input name="price" type="number" inputMode="numeric" min={0} max={999999999999} step={1} defaultValue={item?.price ?? ""} placeholder="원 단위" /></label>
+      <p className="shopping-editor__wide shopping-cost-note">가격을 입력하면 예상 비용에 포함되고, 구매 완료 시 실제 지출에도 반영돼요. 가격 미정은 합계에서 제외돼요.</p>
       <label className="shopping-editor__wide">구매 링크<input name="purchaseUrl" type="text" inputMode="url" defaultValue={item?.purchase_url ?? ""} maxLength={2000} placeholder="예: samsung.com 또는 https://samsung.com" /></label>
       <label className="shopping-editor__wide">메모<textarea name="memo" defaultValue={item?.memo ?? ""} maxLength={2000} rows={3} placeholder="비교한 내용이나 가족과 공유할 메모를 적어 주세요." /></label>
       {state.error ? <p className="form-message shopping-editor__wide" role="alert">{state.error}</p> : null}
