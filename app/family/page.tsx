@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { DisplayNameEditor } from "@/components/family/display-name-editor";
 import { InviteForm } from "@/components/family/invite-form";
+import { SessionControls } from "@/components/family/session-controls";
 import { SectionCard } from "@/components/section-card";
 import { createClient } from "@/lib/supabase/server";
 
@@ -76,6 +77,10 @@ export default async function FamilyPage() {
         ) : (
           <p className="family-notice">초대 링크는 가족 공간의 owner가 만들 수 있어요.</p>
         )}
+      </SectionCard>
+
+      <SectionCard title="내 계정" description="로그인 상태를 관리해요.">
+        <SessionControls email={user.email} />
       </SectionCard>
     </div>
   );

@@ -1536,6 +1536,13 @@ input[type="checkbox"] {
 }
 
 .secondary-button:disabled { opacity: 0.6; cursor: wait; }
+.session-controls { display: grid; gap: 0.85rem; }
+.session-controls__identity { display: grid; gap: 0.3rem; min-width: 0; }
+.session-controls__identity > span { color: var(--muted); font-size: 0.75rem; }
+.session-controls__identity > strong { overflow-wrap: anywhere; font-size: 0.95rem; }
+.session-controls > p { margin: 0; color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
+.session-controls__buttons { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.session-controls__buttons > button { flex: 1 1 10rem; min-height: 2.9rem; font-size: 0.9rem; }
 
 .family-notice {
   margin: 0;

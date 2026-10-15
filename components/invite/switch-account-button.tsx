@@ -21,7 +21,7 @@ export function SwitchAccountButton({ returnTo }: { returnTo: string }) {
       return;
     }
 
-    const { error: signOutError } = await supabase.auth.signOut();
+    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" });
     if (signOutError) {
       setError("로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요.");
       setIsPending(false);
