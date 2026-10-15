@@ -6,7 +6,7 @@ import { getExpenseSummary } from "@/lib/expenses";
 import { getKstDateOnly, getPregnancyProgress } from "@/lib/pregnancy";
 import { formatWon, sortShoppingItems } from "@/lib/shopping";
 import { createClient } from "@/lib/supabase/server";
-import { formatTaskDate, sortTasks, TASK_STATUS_LABELS } from "@/lib/tasks";
+import { formatTaskDate, sortTasks, getTaskStatusLabel } from "@/lib/tasks";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -88,7 +88,7 @@ export default async function HomePage() {
                 <span className="home-task-status" aria-hidden="true" />
                 <div>
                   <strong>{task.title}</strong>
-                  <span>{task.category} · {task.due_date ? formatTaskDate(task.due_date) : TASK_STATUS_LABELS[task.status]}</span>
+                  <span>{task.category} · {task.due_date ? formatTaskDate(task.due_date) : getTaskStatusLabel(task.status)}</span>
                 </div>
               </li>
             ))}

@@ -24,7 +24,7 @@ export function sortShoppingItems(items: ShoppingItem[]) {
     const purchaseOrder = Number(a.purchase_status === "purchased") - Number(b.purchase_status === "purchased");
     if (purchaseOrder !== 0) return purchaseOrder;
 
-    const priorityDifference = priorityOrder[a.priority] - priorityOrder[b.priority];
+    const priorityDifference = getPriorityOrder(a.priority) - getPriorityOrder(b.priority);
     if (priorityDifference !== 0) return priorityDifference;
 
     return b.created_at.localeCompare(a.created_at);
@@ -70,4 +70,12 @@ export function normalizePurchaseUrl(value: string | null) {
 export function getSafePurchaseUrl(value: string | null) {
   const result = normalizePurchaseUrl(value);
   return result.ok ? result.value : null;
+}
+
+function getPriorityOrder(priority: string) {
+  return Object.hasOwn(priorityOrder, priority) ? priorityOrder[priority as ShoppingPriority] : 3;
+}
+
+export function getShoppingPriorityLabel(priority: string) {
+  return Object.hasOwn(SHOPPING_PRIORITY_LABELS, priority) ? SHOPPING_PRIORITY_LABELS[priority as ShoppingPriority] : "우선순위 확인 필요";
 }

@@ -31,6 +31,11 @@ export default async function FamilyPage() {
 
   if (!household || !profile) redirect("/setup");
 
+  const familyMembers = (members ?? []).map((member) => ({
+    ...member,
+    display_name: member.display_name?.trim() || "가족 구성원",
+  }));
+
   return (
     <div className="subpage family-page">
       <header className="page-heading">
@@ -48,7 +53,7 @@ export default async function FamilyPage() {
 
       <SectionCard title="함께하는 가족" description={`${members?.length ?? 0}명이 같은 준비실을 사용하고 있어요.`}>
         <ul className="member-list">
-          {(members ?? []).map((member) => (
+          {familyMembers.map((member) => (
             <li key={member.id}>
               <span className="member-avatar" aria-hidden="true">{member.display_name.slice(0, 1)}</span>
               {member.user_id === user.id ? (

@@ -32,3 +32,7 @@ export function formatTaskDate(value: string) {
   const [, month, day] = value.split("-").map(Number);
   return `${month}월 ${day}일`;
 }
+
+export function getTaskStatusLabel(status: string) {
+  return Object.hasOwn(TASK_STATUS_LABELS, status) ? TASK_STATUS_LABELS[status as TaskStatus] : "상태 확인 필요";
+}

@@ -28,6 +28,7 @@ import {
   SHOPPING_CATEGORIES,
   SHOPPING_PRIORITIES,
   SHOPPING_PRIORITY_LABELS,
+  getShoppingPriorityLabel,
 } from "@/lib/shopping";
 import type { PurchaseStatus, ShoppingItem, ShoppingPriority } from "@/types/database";
 
@@ -185,7 +186,7 @@ function ShoppingCard({ item, onEdit }: { item: ShoppingItem; onEdit: () => void
         </select>
       </div>
       <div className="shopping-card__meta">
-        <span data-priority={item.priority}>{SHOPPING_PRIORITY_LABELS[item.priority]}</span>
+        <span data-priority={item.priority}>{getShoppingPriorityLabel(item.priority)}</span>
         <span>{item.price === null ? "가격 미정" : formatWon(item.price)}</span>
       </div>
       {item.memo ? <p className="shopping-card__memo">{item.memo}</p> : null}

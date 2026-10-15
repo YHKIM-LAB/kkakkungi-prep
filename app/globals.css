@@ -1045,11 +1045,24 @@ input[type="checkbox"] {
 .shopping-editor__heading .eyebrow { margin-bottom: 0.25rem; }
 .shopping-editor__heading h2 { margin: 0; font-size: 1.15rem; letter-spacing: -0.04em; }
 .shopping-editor label { display: grid; gap: 0.4rem; color: #4d5a55; font-size: 0.74rem; font-weight: 800; }
+.shopping-editor select {
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23758078' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  background-size: 1rem;
+}
+@media (forced-colors: active) {
+  .shopping-editor select { appearance: auto; background-image: none; }
+}
 .shopping-editor textarea { resize: vertical; line-height: 1.5; }
 .shopping-editor input:focus,
 .shopping-editor select:focus,
 .shopping-editor textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .shopping-editor__buttons { display: flex; justify-content: flex-end; gap: 0.55rem; }
+.shopping-editor__buttons > button,
+.shopping-editor__buttons > button:first-child { font-size: 1rem; }
 .shopping-editor__buttons .primary-button { min-width: 6rem; }
 
 .shopping-flash {
